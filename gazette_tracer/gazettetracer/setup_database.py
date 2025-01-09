@@ -1,6 +1,7 @@
 import click
 import pandas as pd
-from doctracer import Neo4jInterface
+from gazettetracer import Neo4jInterface
+
 
 neo4j_interface = Neo4jInterface()
 

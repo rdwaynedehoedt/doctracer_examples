@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from doctracer import Neo4jInterface
+from gazettetracer import Neo4jInterface
 from gazettetracer.setup_database import (load_gazette_data_from_csv,
                                         load_relationships_from_csv, 
                                         delete_gazette_data)

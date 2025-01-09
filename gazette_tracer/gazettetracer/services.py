@@ -49,5 +49,5 @@ class GazetteService:
 
     def extract_text(self, pdf_url: str) -> str:
         """Extract text from a PDF URL."""
-        from doctracer import extract_text_from_pdf
+        from gazettetracer import extract_text_from_pdf
         return extract_text_from_pdf(pdf_url) 
