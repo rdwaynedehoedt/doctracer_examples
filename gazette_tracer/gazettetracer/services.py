@@ -1,7 +1,12 @@
 from typing import List, Dict, Any
+from doctracer.extract import extract_text_from_pdfplumber
+from doctracer import Neo4jInterface
+import requests
+import os
+import tempfile
 
 class GazetteService:
-    def __init__(self, neo4j_interface):
+    def __init__(self, neo4j_interface: Neo4jInterface):
         self.neo4j = neo4j_interface
 
     def get_timeline(self) -> List[Dict[str, Any]]:
@@ -49,5 +54,18 @@ class GazetteService:
 
     def extract_text(self, pdf_url: str) -> str:
         """Extract text from a PDF URL."""
-        from doctracer import extract_text_from_pdf
-        return extract_text_from_pdf(pdf_url) 
+        # Download the PDF from the URL
+        response = requests.get(pdf_url)
+
+        # Create a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            temp_file.write(response.content)
+            pdf_path = temp_file.name
+
+        # Extract text from the downloaded PDF
+        text = extract_text_from_pdfplumber(pdf_path)
+
+        # Optionally, remove the temporary file
+        os.remove(pdf_path)
+
+        return text 

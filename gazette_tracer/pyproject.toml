@@ -13,6 +13,7 @@ keywords = ["document-tracing", "python", "flask"]
 authors = [{ name = "Vibhatha Abeykoon", email = "vibhatha@example.com" }]
 maintainers = [{ name = "Vibhatha Abeykoon", email = "vibhatha@example.com" }]
 
+# Supported classifiers
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
@@ -30,7 +31,9 @@ dependencies = [
   "flask",
   "flask-cors>=5.0.0",
   "doctracer",
-  "click"
+  "click",
+  "openai",
+  "pdfplumber",
 ]
 
 [project.optional-dependencies]
@@ -43,6 +46,7 @@ Source = "https://github.com/vibhatha/doctracer_examples/gazette_tracer"
 
 [project.scripts]
 gazetterunner = "gazettetracer.render:cli"
+doctracer = "gazettetracer.cli.extract:extract"
 
 [tool.setuptools]
 package-data = { "gazettetracer" = ["*.json", "*.yaml"] }

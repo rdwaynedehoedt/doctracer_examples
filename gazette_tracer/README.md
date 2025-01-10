@@ -37,3 +37,10 @@ gazetterunner delete
 ```bash
 gazetterunner start
 ```
+
+## Run the React app
+
+```bash
+cd ui/gazette-visualizer
+npm run dev
+```
