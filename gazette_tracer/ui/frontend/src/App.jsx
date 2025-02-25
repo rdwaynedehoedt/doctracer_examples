@@ -47,7 +47,7 @@ const fetchGazetteData = async (dates) => {
         RETURN p, COLLECT(c.name) AS childGazettes`
       );
 
-      const graph = { name: "Gazettes", children: [] };
+      const graph = { name: "Amendment Gazettes", children: [] };
       result.records.forEach((record) => {
         const parent = record.get("p").properties.name;
         const children = record.get("childGazettes");
@@ -104,14 +104,14 @@ const App = () => {
 
   return (
     <ErrorBoundary>
-      <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1e1e1e", color: "white" }}>
         <header style={{ height: "50px", backgroundColor: "#1e1e1e", padding: "10px 20px", color: "white" }}>
           <h2>Gazette Amendments</h2>
         </header>
         <div style={{ height: "120px", backgroundColor: "#1e1e1e", padding: "20px", display: "flex", alignItems: "center" }}>
           {gazetteDates.length > 0 && <EventSlider data={timelineData} onSelectDate={handleDateChange} />}
         </div>
-        <div style={{ flex: 1, padding: "20px", overflow: "auto" }}>
+        <div style={{ flex: 1, padding: "20px", overflow: "auto", backgroundColor: "#1e1e1e", color: "white" }}>
           {isTreeDataLoading ? <p>Loading...</p> : <TidyTree data={treeData} />}
         </div>
       </div>
