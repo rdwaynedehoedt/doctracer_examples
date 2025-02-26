@@ -42,18 +42,26 @@ const fetchGazetteData = async (dates) => {
 
       // Query to fetch parent gazettes and their child amendments
       const result = await session.run(
-        `MATCH (p:Gazette)-[r:AMENDS]->(c:Gazette)
-        WHERE c.date = "${selectedDate}"
-        RETURN p, COLLECT(c.name) AS childGazettes`
+        `MATCH (c:Gazette)-[r:AMENDS]->(p:Gazette)
+        WHERE p.date = $date
+        RETURN p, COLLECT(c) AS children`,
+        { date: selectedDate } // Dynamically pass selectedDate
       );
 
-      const graph = { name: "Amendment Gazettes", children: [] };
-      result.records.forEach((record) => {
-        const parent = record.get("p").properties.name;
-        const children = record.get("childGazettes");
+      if (result.records.length === 0) {
+        console.warn(`No data found for date: ${selectedDate}`);
+        continue;
+      }
 
-        graph.children.push({ name: parent, children: children.map((child) => ({ name: child })) });
-      });
+      // Extract the first parent gazette from the result
+      const parentGazette = result.records[0].get("p").properties;
+      const childGazettes = result.records[0].get("children");
+
+      // Set the parent gazette name as the root
+      const graph = {
+        name: parentGazette.name,
+        children: childGazettes.map(child => ({ name: child.properties.name }))
+      };
 
       allData[selectedDate] = graph;
     }
