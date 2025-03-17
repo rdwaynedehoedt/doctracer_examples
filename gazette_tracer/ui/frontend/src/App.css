@@ -1,8 +1,9 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
 }
 
 .logo {
@@ -39,4 +40,177 @@
 
 .read-the-docs {
   color: #888;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: white;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-header {
+  height: 50px;
+  background-color: #1e1e1e;
+  padding: 10px 20px;
+  color: white;
+  border-bottom: 1px solid #333;
+}
+
+.timeline-container {
+  height: auto;
+  min-height: 80px;
+  background-color: #1e1e1e;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #333;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+.tree-container {
+  flex: 1;
+  padding: 20px;
+  overflow: auto;
+  width: 100%;
+  position: relative;
+}
+
+.tree-container.with-preview {
+  width: 70%;
+}
+
+.preview-section {
+  position: absolute;
+  left: 70%;
+  top: 45%;
+  transform: translateY(-50%) scale(0.95);
+  width: 350px;
+  max-width: 28%;
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: auto;
+  max-height: calc(100% - 60px);
+  display: none;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 10;
+}
+
+.preview-section.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+.close-preview {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  z-index: 1;
+  transition: color 0.3s ease;
+}
+
+.close-preview:hover {
+  color: #fff;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 1.2em;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .preview-section {
+    width: 320px;
+    max-width: 30%;
+  }
+}
+
+@media (max-width: 768px) {
+  .preview-section {
+    position: fixed;
+    right: 50%;
+    top: auto;
+    bottom: 20px;
+    transform: translateX(50%) scale(0.95);
+    width: 90%;
+    max-width: 450px;
+    max-height: 60vh;
+  }
+  
+  .preview-section.visible {
+    transform: translateX(50%) scale(1);
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateX(50%) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(50%) scale(1);
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 10px;
+  }
+  
+  .app-header h2 {
+    font-size: 1.2em;
+  }
+  
+  .timeline-container {
+    padding: 5px;
+  }
+
+  .tree-container {
+    padding: 10px;
+  }
+  
+  .preview-section {
+    width: 95%;
+    max-height: 50vh;
+  }
 }

@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./TidyTree.css";
 
-const TidyTree = ({ data }) => {
+const TidyTree = ({ data, onNodeSelect }) => {
   const containerRef = useRef(null);
   const [width, setWidth] = useState(window.innerWidth);
-  let ministersExpanded = false;
 
   useEffect(() => {
     const handleResize = () => setWidth(window.innerWidth); // Update width on window resize
@@ -60,7 +59,6 @@ const TidyTree = ({ data }) => {
       .attr("pointer-events", "all");
 
     function update(event, source) {
-      //const duration = event?.altKey ? 2500 : 250; // hold the alt key to slow down the transition
       const duration = 500;
       const nodes = root.descendants().reverse();
       const links = root.links();
@@ -74,7 +72,6 @@ const TidyTree = ({ data }) => {
         if (node.x > right.x) right = node;
       });
 
-      //const width = window.innerWidth;
       const height = right.x - left.x + marginTop + marginBottom;
 
       const transition = svg
@@ -94,37 +91,28 @@ const TidyTree = ({ data }) => {
         .attr("data-id", (d) => d.id)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
-        // .on("click", (event, d) => {
-        //   d.children = d.children ? null : d._children;
-        //   update(event, d);
-        // })
         .on("click", (event, d) => {
-          const isExpanding = !d.children; // Check if the node is expanding
+          const isExpanding = !d.children;
 
           d.children = isExpanding ? d._children : null;
           update(event, d);
 
           // Apply or remove highlight
-          d3.selectAll(".nodes circle,.nodes text").classed("highlight", false); // Remove highlight from all
-          //d3.selectAll(".link").classed("highlight", false);
+          d3.selectAll(".nodes circle,.nodes text").classed("highlight", false);
 
           if (isExpanding) {
             highlightNodes(d);
             update(event, d);
           }
 
-          // Set a flag for ministers to shift position when expanded
-          if (d.depth === 1) {
-            if (isExpanding) {
-              ministersExpanded = true;  // Move ministers to the left
-            } else {
-              // Check if all minister nodes are collapsed
-              const allCollapsed = root.children.every(min => !min.children);
-              ministersExpanded = !allCollapsed;  // Reset to false if all are collapsed
-            }
-            update(event, d);
-          }
-
+          // Call onNodeSelect with the node's data
+          onNodeSelect && onNodeSelect({
+            name: d.data.name,
+            date: d.data.date,
+            description: d.data.description,
+            gazette_id: d.data.gazette_id,
+            url: d.data.url
+          });
         });
 
       nodeEnter.append("circle")
@@ -139,17 +127,7 @@ const TidyTree = ({ data }) => {
       // Transition nodes to their new position.
       node.merge(nodeEnter)
         .transition(transition)
-        .attr("transform", (d) => {
-          // Adjust the x for second layer (minister nodes)
-          let adjustedX = d.y;
-          if (d.depth === 1) {
-            // For depth 1 nodes (minister nodes), center them horizontally
-            //adjustedX = width / 2;
-            // If ministers are expanded, shift them left to 1/4 of the width
-            adjustedX = ministersExpanded ? width / 4 : width / 2;
-          }
-          return `translate(${adjustedX},${d.x})`;
-        })
+        .attr("transform", (d) => `translate(${d.y},${d.x})`)
         .attr("fill-opacity", 1)
         .attr("stroke-opacity", 1)
 
@@ -176,21 +154,7 @@ const TidyTree = ({ data }) => {
       // Transition links to their new position.
       link.merge(linkEnter)
         .transition(transition)
-        //.attr("d", diagonal);
-        .attr("d", (d) => {
-          // Adjust the link paths for the second layer nodes (minister nodes)
-          // const adjustedSourceY = d.source.depth === 1 ? width / 2 : d.source.y;
-          // const adjustedTargetY = d.target.depth === 1 ? width / 2 : d.target.y;
-
-          // const sourcePosition = { x: d.source.x, y: adjustedSourceY };
-          // const targetPosition = { x: d.target.x, y: adjustedTargetY };
-
-          // return diagonal({ source: sourcePosition, target: targetPosition });
-          const adjustedSourceY = d.source.depth === 1 ? (ministersExpanded ? width / 4 : width / 2) : d.source.y;
-          const adjustedTargetY = d.target.depth === 1 ? (ministersExpanded ? width / 4 : width / 2) : d.target.y;
-
-          return diagonal({ source: { x: d.source.x, y: adjustedSourceY }, target: { x: d.target.x, y: adjustedTargetY } });
-        });
+        .attr("d", diagonal);
 
       // Transition existing nodes to the parent's new position.
       link.exit()

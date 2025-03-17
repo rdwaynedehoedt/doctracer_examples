@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import Neo4j from "neo4j-driver";
 import TidyTree from "./components/TidyTree"; // Component to visualize the tree
 import EventSlider from "./components/EventSlider";
+import GazettePreview from "./components/GazettePreview";
 import { ErrorBoundary } from "react-error-boundary";
+import "./App.css";
 
 // Neo4j connection settings
 const uri = import.meta.env.VITE_NEO4J_ORGCHART_DB_URI;
@@ -38,14 +40,13 @@ const fetchGazetteData = async (dates) => {
 
   try {
     for (const selectedDate of dates) {
-      if (allData[selectedDate]) continue; // Skip if already fetched
+      if (allData[selectedDate]) continue;
 
-      // Query to fetch parent gazettes and their child amendments
       const result = await session.run(
         `MATCH (c:Gazette)-[r:AMENDS]->(p:Gazette)
         WHERE p.date = $date
         RETURN p, COLLECT(c) AS children`,
-        { date: selectedDate } // Dynamically pass selectedDate
+        { date: selectedDate }
       );
 
       if (result.records.length === 0) {
@@ -53,14 +54,22 @@ const fetchGazetteData = async (dates) => {
         continue;
       }
 
-      // Extract the first parent gazette from the result
       const parentGazette = result.records[0].get("p").properties;
       const childGazettes = result.records[0].get("children");
 
-      // Set the parent gazette name as the root
       const graph = {
         name: parentGazette.name,
-        children: childGazettes.map(child => ({ name: child.properties.name }))
+        date: parentGazette.date,
+        description: parentGazette.description,
+        gazette_id: parentGazette.gazette_id,
+        url: parentGazette.url,
+        children: childGazettes.map(child => ({
+          name: child.properties.name,
+          date: child.properties.date,
+          description: child.properties.description,
+          gazette_id: child.properties.gazette_id,
+          url: child.properties.url
+        }))
       };
 
       allData[selectedDate] = graph;
@@ -76,9 +85,11 @@ const fetchGazetteData = async (dates) => {
 
 const App = () => {
   const [treeData, setTreeData] = useState(null);
+  const [selectedGazette, setSelectedGazette] = useState(null);
   const [isTreeDataLoading, setIsTreeDataLoading] = useState(true);
   const [gazetteDates, setGazetteDates] = useState([]);
   const [allData, setAllData] = useState({});
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -86,10 +97,10 @@ const App = () => {
       setGazetteDates(dates);
 
       if (dates.length > 0) {
-        const latestDate = dates[dates.length - 1];
-        const initialData = await fetchGazetteData([latestDate]);
+        const initialDate = dates.includes('2022-July-22') ? '2022-July-22' : dates[dates.length - 1];
+        const initialData = await fetchGazetteData([initialDate]);
         setAllData(initialData);
-        setTreeData(initialData[latestDate]);
+        setTreeData(initialData[initialDate]);
         setIsTreeDataLoading(false);
       }
     };
@@ -108,19 +119,42 @@ const App = () => {
     setIsTreeDataLoading(false);
   };
 
+  const handleNodeSelect = (nodeData) => {
+    setSelectedGazette(nodeData);
+    setShowPreview(true);
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setTimeout(() => setSelectedGazette(null), 300);
+  };
+
   const timelineData = gazetteDates.map((date) => ({ date, event: `Gazettes on ${date}` }));
 
   return (
     <ErrorBoundary>
-      <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1e1e1e", color: "white" }}>
-        <header style={{ height: "50px", backgroundColor: "#1e1e1e", padding: "10px 20px", color: "white" }}>
+      <div className="app-container">
+        <header className="app-header">
           <h2>Gazette Amendments</h2>
         </header>
-        <div style={{ height: "120px", backgroundColor: "#1e1e1e", padding: "20px", display: "flex", alignItems: "center" }}>
+        <div className="timeline-container">
           {gazetteDates.length > 0 && <EventSlider data={timelineData} onSelectDate={handleDateChange} />}
         </div>
-        <div style={{ flex: 1, padding: "20px", overflow: "auto", backgroundColor: "#1e1e1e", color: "white" }}>
-          {isTreeDataLoading ? <p>Loading...</p> : <TidyTree data={treeData} />}
+        <div className="main-content">
+          <div className={`tree-container ${showPreview ? 'with-preview' : ''}`}>
+            {isTreeDataLoading ? (
+              <div className="loading">Loading...</div>
+            ) : (
+              <TidyTree 
+                data={treeData} 
+                onNodeSelect={handleNodeSelect}
+              />
+            )}
+            <div className={`preview-section ${showPreview ? 'visible' : ''}`}>
+              <button className="close-preview" onClick={handleClosePreview}>×</button>
+              <GazettePreview gazette={selectedGazette} />
+            </div>
+          </div>
         </div>
       </div>
     </ErrorBoundary>

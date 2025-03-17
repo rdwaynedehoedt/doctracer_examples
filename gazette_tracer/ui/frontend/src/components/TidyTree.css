@@ -12,19 +12,52 @@
 }
 
 .nodes circle {
-    fill: #F3F3FF;
-    /* Circle fill color */
-    stroke: #2593B8;
-    /* Circle border color */
-    stroke-width: 1.5px;
+    fill: #2593B8;
+    transition: fill 0.3s ease, r 0.3s ease;
 }
 
-circle.highlight {
-    fill: orange;
-    /* Highlight color */
+.nodes g:hover circle {
+    fill: #34c3f3;
+    r: 7;
 }
 
-text.highlight {
-    font-weight: bold;
+.nodes g:hover text {
     font-size: 14px;
+    font-weight: 500;
+}
+
+.links path {
+    stroke: #2593B8;
+    stroke-opacity: 0.4;
+    stroke-width: 1.5;
+    transition: stroke-opacity 0.3s ease;
+}
+
+.links path:hover {
+    stroke-opacity: 0.8;
+}
+
+.highlight circle {
+    fill: #34c3f3;
+    r: 7;
+}
+
+.highlight text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nodes text {
+        font-size: 10px;
+    }
+    
+    .nodes g:hover text {
+        font-size: 12px;
+    }
+    
+    .highlight text {
+        font-size: 12px;
+    }
 }
