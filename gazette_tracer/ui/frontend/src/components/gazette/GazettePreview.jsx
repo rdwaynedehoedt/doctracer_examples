@@ -1,7 +1,7 @@
 import React from 'react';
 import './GazettePreview.css';
 
-const GazettePreview = ({ gazette }) => {
+const GazettePreview = ({ gazette, onViewPdf }) => {
   if (!gazette) {
     return (
       <div className="gazette-preview empty">
@@ -10,8 +10,13 @@ const GazettePreview = ({ gazette }) => {
     );
   }
 
+  const handleViewPdf = (e) => {
+    e.preventDefault();
+    onViewPdf(gazette.url);
+  };
+
   return (
-    <div className="gazette-preview">
+    <div className="gazette-preview" key={gazette.gazette_id}>
       <h3>Gazette Details</h3>
       
       <div className="preview-field">
@@ -38,8 +43,7 @@ const GazettePreview = ({ gazette }) => {
         <label>URL</label>
         <a 
           href={gazette.url} 
-          target="_blank" 
-          rel="noopener noreferrer"
+          onClick={handleViewPdf}
           className="gazette-link"
         >
           View Gazette Document

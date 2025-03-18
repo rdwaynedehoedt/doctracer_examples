@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Neo4j from "neo4j-driver";
-import TidyTree from "./components/TidyTree"; // Component to visualize the tree
+import TidyTree from "./components/TidyTree";
 import EventSlider from "./components/EventSlider";
-import GazettePreview from "./components/GazettePreview";
+import GazettePreview from "./components/gazette/GazettePreview";
+import PDFViewer from "./components/common/PDFViewer";
 import { ErrorBoundary } from "react-error-boundary";
 import "./App.css";
 
@@ -90,6 +91,8 @@ const App = () => {
   const [gazetteDates, setGazetteDates] = useState([]);
   const [allData, setAllData] = useState({});
   const [showPreview, setShowPreview] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState(null);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -129,6 +132,16 @@ const App = () => {
     setTimeout(() => setSelectedGazette(null), 300);
   };
 
+  const handleOpenPdf = (url) => {
+    setPdfUrl(url);
+    setShowPdfViewer(true);
+  };
+
+  const handleClosePdf = () => {
+    setShowPdfViewer(false);
+    setTimeout(() => setPdfUrl(null), 300);
+  };
+
   const timelineData = gazetteDates.map((date) => ({ date, event: `Gazettes on ${date}` }));
 
   return (
@@ -152,10 +165,20 @@ const App = () => {
             )}
             <div className={`preview-section ${showPreview ? 'visible' : ''}`}>
               <button className="close-preview" onClick={handleClosePreview}>×</button>
-              <GazettePreview gazette={selectedGazette} />
+              <GazettePreview 
+                gazette={selectedGazette} 
+                onViewPdf={handleOpenPdf}
+              />
             </div>
           </div>
         </div>
+        
+        {/* PDF Viewer as a page-level component */}
+        <PDFViewer 
+          url={pdfUrl} 
+          isOpen={showPdfViewer} 
+          onClose={handleClosePdf}
+        />
       </div>
     </ErrorBoundary>
   );
